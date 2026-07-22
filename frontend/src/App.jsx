@@ -9,6 +9,7 @@ function App() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formError, setFormError] = useState(null);
   const [taskToEdit, setTaskToEdit] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleFormSubmit = async (taskData) => {
     setFormError(null);
@@ -91,6 +92,10 @@ function App() {
     fetchTasks();
   }, []);
 
+  const filteredTasks = tasks.filter(task => 
+    task.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="app-container">
       <header className="dashboard-header">
@@ -114,6 +119,8 @@ function App() {
           type="text" 
           placeholder="Search tasks by title..." 
           className="search-input"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
         <select className="filter-select">
           <option value="All">All Statuses</option>
@@ -139,9 +146,13 @@ function App() {
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
           <p>No tasks found. Create a new task to get started!</p>
         </div>
+      ) : filteredTasks.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+          <p>No matching tasks found.</p>
+        </div>
       ) : (
         <div className="tasks-grid">
-          {tasks.map((task) => (
+          {filteredTasks.map((task) => (
             <TaskCard 
               key={task._id} 
               task={task} 

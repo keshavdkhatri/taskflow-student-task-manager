@@ -10,6 +10,8 @@ function App() {
   const [formError, setFormError] = useState(null);
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [filterPriority, setFilterPriority] = useState('All');
 
   const handleFormSubmit = async (taskData) => {
     setFormError(null);
@@ -92,9 +94,12 @@ function App() {
     fetchTasks();
   }, []);
 
-  const filteredTasks = tasks.filter(task => 
-    task.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTasks = tasks.filter(task => {
+    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = filterStatus === 'All' || task.status === filterStatus;
+    const matchesPriority = filterPriority === 'All' || task.priority === filterPriority;
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
 
   return (
     <div className="app-container">
@@ -122,11 +127,25 @@ function App() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <select className="filter-select">
+        <select 
+          className="filter-select"
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+        >
           <option value="All">All Statuses</option>
           <option value="Pending">Pending</option>
           <option value="In Progress">In Progress</option>
           <option value="Completed">Completed</option>
+        </select>
+        <select 
+          className="filter-select"
+          value={filterPriority}
+          onChange={(e) => setFilterPriority(e.target.value)}
+        >
+          <option value="All">All Priorities</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
         </select>
         <select className="filter-select">
           <option value="asc">Due Date (Asc)</option>

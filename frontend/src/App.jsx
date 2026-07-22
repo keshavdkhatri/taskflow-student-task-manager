@@ -53,22 +53,16 @@ function App() {
   };
 
   const handleDeleteTask = async (taskId) => {
-    if (!window.confirm('Are you sure you want to delete this task?')) return;
+    const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
+      method: 'DELETE',
+    });
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete task');
-      }
-
-      // Remove the deleted task from local state
-      setTasks(prevTasks => prevTasks.filter(t => t._id !== taskId));
-    } catch (err) {
-      alert(err.message);
+    if (!response.ok) {
+      throw new Error('Failed to delete task');
     }
+
+    // Remove the deleted task from local state
+    setTasks(prevTasks => prevTasks.filter(t => t._id !== taskId));
   };
 
 

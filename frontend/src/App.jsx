@@ -12,6 +12,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterPriority, setFilterPriority] = useState('All');
+  const [sortBy, setSortBy] = useState('Newest');
 
   const handleFormSubmit = async (taskData) => {
     setFormError(null);
@@ -94,12 +95,29 @@ function App() {
     fetchTasks();
   }, []);
 
-  const filteredTasks = tasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = filterStatus === 'All' || task.status === filterStatus;
-    const matchesPriority = filterPriority === 'All' || task.priority === filterPriority;
-    return matchesSearch && matchesStatus && matchesPriority;
-  });
+  const filteredTasks = tasks
+    .filter(task => {
+      const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = filterStatus === 'All' || task.status === filterStatus;
+      const matchesPriority = filterPriority === 'All' || task.priority === filterPriority;
+      return matchesSearch && matchesStatus && matchesPriority;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'Newest') {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      } else if (sortBy === 'Oldest') {
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      } else if (sortBy === 'Due Date') {
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate) - new Date(b.dueDate);
+      } else if (sortBy === 'Priority') {
+        const priorityWeight = { 'High': 3, 'Medium': 2, 'Low': 1 };
+        return (priorityWeight[b.priority] || 0) - (priorityWeight[a.priority] || 0);
+      }
+      return 0;
+    });
 
   return (
     <div className="app-container">
@@ -147,9 +165,15 @@ function App() {
           <option value="Medium">Medium</option>
           <option value="High">High</option>
         </select>
-        <select className="filter-select">
-          <option value="asc">Due Date (Asc)</option>
-          <option value="desc">Due Date (Desc)</option>
+        <select 
+          className="filter-select"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+        >
+          <option value="Newest">Newest</option>
+          <option value="Oldest">Oldest</option>
+          <option value="Due Date">Due Date</option>
+          <option value="Priority">Priority (High to Low)</option>
         </select>
       </div>
 

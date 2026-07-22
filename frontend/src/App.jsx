@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './index.css';
 import TaskCard from './components/TaskCard';
+import TaskForm from './components/TaskForm';
 
 function App() {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  const handleCreateTask = (newTaskData) => {
+    console.log('Task submitted (frontend only):', newTaskData);
+    setIsFormOpen(false); // Close modal on submit
+  };
+
   // Dummy data for initial UI layout
   const dummyTasks = [
     {
@@ -45,7 +53,7 @@ function App() {
           <h1>TaskFlow</h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Organize your academic and daily tasks</p>
         </div>
-        <button className="btn-primary">
+        <button className="btn-primary" onClick={() => setIsFormOpen(true)}>
           + New Task
         </button>
       </header>
@@ -73,6 +81,13 @@ function App() {
           <TaskCard key={task._id} task={task} />
         ))}
       </div>
+
+      {isFormOpen && (
+        <TaskForm 
+          onClose={() => setIsFormOpen(false)} 
+          onSubmit={handleCreateTask} 
+        />
+      )}
     </div>
   );
 }

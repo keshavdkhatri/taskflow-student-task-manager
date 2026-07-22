@@ -140,6 +140,7 @@ function App() {
       <div className="dashboard-controls">
         <input 
           type="text" 
+          aria-label="Search tasks"
           placeholder="Search tasks by title..." 
           className="search-input"
           value={searchQuery}
@@ -147,6 +148,7 @@ function App() {
         />
         <select 
           className="filter-select"
+          aria-label="Filter by Status"
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
         >
@@ -157,6 +159,7 @@ function App() {
         </select>
         <select 
           className="filter-select"
+          aria-label="Filter by Priority"
           value={filterPriority}
           onChange={(e) => setFilterPriority(e.target.value)}
         >
@@ -167,6 +170,7 @@ function App() {
         </select>
         <select 
           className="filter-select"
+          aria-label="Sort tasks"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
         >
@@ -178,20 +182,22 @@ function App() {
       </div>
 
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+        <div className="loading-state">
           <p>Loading tasks...</p>
         </div>
       ) : error ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#ef4444', backgroundColor: '#fef2f2', borderRadius: '8px' }}>
+        <div className="error-state">
           <p>{error}</p>
         </div>
       ) : tasks.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-          <p>No tasks found. Create a new task to get started!</p>
+        <div className="empty-state">
+          <h3>No tasks yet</h3>
+          <p>Create your first task to get started!</p>
         </div>
       ) : filteredTasks.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-          <p>No matching tasks found.</p>
+        <div className="empty-state">
+          <h3>No matching tasks</h3>
+          <p>Try adjusting your search or filters.</p>
         </div>
       ) : (
         <div className="tasks-grid">

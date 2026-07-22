@@ -74,6 +74,11 @@ p {
   letter-spacing: -0.025em;
 }
 
+button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 .btn-primary {
   background-color: var(--accent-blue);
   color: white;

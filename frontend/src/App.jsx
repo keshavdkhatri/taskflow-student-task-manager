@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './index.css';
 import TaskCard from './components/TaskCard';
 import TaskForm from './components/TaskForm';
+
+const API_BASE_URL = 'http://localhost:5000/api';
 
 function App() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -11,40 +13,28 @@ function App() {
     setIsFormOpen(false); // Close modal on submit
   };
 
-  // Dummy data for initial UI layout
-  const dummyTasks = [
-    {
-      _id: '1',
-      title: 'Complete React Dashboard',
-      description: 'Build the initial UI layout for the TaskFlow application using React and plain CSS.',
-      priority: 'High',
-      status: 'In Progress',
-      dueDate: new Date(new Date().getTime() + 86400000).toISOString(),
-    },
-    {
-      _id: '2',
-      title: 'Review MongoDB Schema',
-      description: 'Check if the Mongoose schema covers all required fields from the PRD.',
-      priority: 'Medium',
-      status: 'Pending',
-      dueDate: new Date(new Date().getTime() + 86400000 * 2).toISOString(),
-    },
-    {
-      _id: '3',
-      title: 'Set up Express API',
-      description: 'Implement CRUD routes and controllers for the backend API.',
-      priority: 'High',
-      status: 'Completed',
-      dueDate: new Date(new Date().getTime() - 86400000).toISOString(),
-    },
-    {
-      _id: '4',
-      title: 'Walk the dog',
-      description: 'Take Max to the park for his evening walk.',
-      priority: 'Low',
-      status: 'Pending',
-    }
-  ];
+  const [tasks, setTasks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/tasks`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch tasks from server');
+        }
+        const data = await response.json();
+        setTasks(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, []);
 
   return (
     <div className="app-container">
@@ -76,11 +66,25 @@ function App() {
         </select>
       </div>
 
-      <div className="tasks-grid">
-        {dummyTasks.map((task) => (
-          <TaskCard key={task._id} task={task} />
-        ))}
-      </div>
+      {isLoading ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+          <p>Loading tasks...</p>
+        </div>
+      ) : error ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: '#ef4444', backgroundColor: '#fef2f2', borderRadius: '8px' }}>
+          <p>{error}</p>
+        </div>
+      ) : tasks.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+          <p>No tasks found. Create a new task to get started!</p>
+        </div>
+      ) : (
+        <div className="tasks-grid">
+          {tasks.map((task) => (
+            <TaskCard key={task._id} task={task} />
+          ))}
+        </div>
+      )}
 
       {isFormOpen && (
         <TaskForm 

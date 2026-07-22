@@ -7,10 +7,32 @@ const API_BASE_URL = 'http://localhost:5000/api';
 
 function App() {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formError, setFormError] = useState(null);
 
-  const handleCreateTask = (newTaskData) => {
-    console.log('Task submitted (frontend only):', newTaskData);
-    setIsFormOpen(false); // Close modal on submit
+  const handleCreateTask = async (newTaskData) => {
+    setFormError(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/tasks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTaskData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create task on server');
+      }
+
+      const createdTask = await response.json();
+      
+      // Add the new task to the top of the list
+      setTasks(prevTasks => [createdTask, ...prevTasks]);
+      
+      setIsFormOpen(false); // Close modal on success
+    } catch (err) {
+      setFormError(err.message);
+    }
   };
 
   const [tasks, setTasks] = useState([]);
@@ -88,8 +110,12 @@ function App() {
 
       {isFormOpen && (
         <TaskForm 
-          onClose={() => setIsFormOpen(false)} 
-          onSubmit={handleCreateTask} 
+          onClose={() => {
+            setIsFormOpen(false);
+            setFormError(null);
+          }} 
+          onSubmit={handleCreateTask}
+          submitError={formError}
         />
       )}
     </div>

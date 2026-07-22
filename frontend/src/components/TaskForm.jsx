@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const TaskForm = ({ onClose, onSubmit, initialData = null }) => {
+const TaskForm = ({ onClose, onSubmit, initialData = null, submitError = null }) => {
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     description: initialData?.description || '',
@@ -52,6 +52,11 @@ const TaskForm = ({ onClose, onSubmit, initialData = null }) => {
         </div>
         
         <form onSubmit={handleSubmit} className="task-form">
+          {submitError && (
+            <div style={{ backgroundColor: '#fef2f2', color: '#ef4444', padding: '0.75rem', borderRadius: '6px', fontSize: '0.875rem' }}>
+              {submitError}
+            </div>
+          )}
           <div className="form-group">
             <label htmlFor="title">Title *</label>
             <input

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const TaskCard = ({ task }) => {
+const TaskCard = ({ task, onEdit, onDelete }) => {
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'High': return 'var(--priority-high)';
@@ -56,8 +56,8 @@ const TaskCard = ({ task }) => {
       </div>
 
       <div className="task-actions">
-        <button className="btn-secondary">Edit</button>
-        <button className="btn-secondary btn-danger">Delete</button>
+        <button className="btn-secondary" onClick={() => onEdit(task)}>Edit</button>
+        <button className="btn-secondary btn-danger" onClick={() => onDelete(task._id)}>Delete</button>
       </div>
     </div>
   );

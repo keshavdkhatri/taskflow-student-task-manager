@@ -8,32 +8,65 @@ const API_BASE_URL = 'http://localhost:5000/api';
 function App() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formError, setFormError] = useState(null);
+  const [taskToEdit, setTaskToEdit] = useState(null);
 
-  const handleCreateTask = async (newTaskData) => {
+  const handleFormSubmit = async (taskData) => {
     setFormError(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/tasks`, {
-        method: 'POST',
+      const isEdit = Boolean(taskData._id);
+      const url = isEdit ? `${API_BASE_URL}/tasks/${taskData._id}` : `${API_BASE_URL}/tasks`;
+      const method = isEdit ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newTaskData),
+        body: JSON.stringify(taskData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create task on server');
+        throw new Error(`Failed to ${isEdit ? 'update' : 'create'} task on server`);
       }
 
-      const createdTask = await response.json();
+      const savedTask = await response.json();
       
-      // Add the new task to the top of the list
-      setTasks(prevTasks => [createdTask, ...prevTasks]);
+      setTasks(prevTasks => {
+        if (isEdit) {
+          // Replace the old task with the updated one
+          return prevTasks.map(t => t._id === savedTask._id ? savedTask : t);
+        } else {
+          // Add the new task to the top
+          return [savedTask, ...prevTasks];
+        }
+      });
       
       setIsFormOpen(false); // Close modal on success
+      setTaskToEdit(null); // Reset edit state
     } catch (err) {
       setFormError(err.message);
     }
   };
+
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm('Are you sure you want to delete this task?')) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete task');
+      }
+
+      // Remove the deleted task from local state
+      setTasks(prevTasks => prevTasks.filter(t => t._id !== taskId));
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
 
   const [tasks, setTasks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,7 +98,13 @@ function App() {
           <h1>TaskFlow</h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Organize your academic and daily tasks</p>
         </div>
-        <button className="btn-primary" onClick={() => setIsFormOpen(true)}>
+        <button 
+          className="btn-primary" 
+          onClick={() => {
+            setTaskToEdit(null);
+            setIsFormOpen(true);
+          }}
+        >
           + New Task
         </button>
       </header>
@@ -103,7 +142,15 @@ function App() {
       ) : (
         <div className="tasks-grid">
           {tasks.map((task) => (
-            <TaskCard key={task._id} task={task} />
+            <TaskCard 
+              key={task._id} 
+              task={task} 
+              onEdit={(t) => {
+                setTaskToEdit(t);
+                setIsFormOpen(true);
+              }}
+              onDelete={handleDeleteTask}
+            />
           ))}
         </div>
       )}
@@ -113,9 +160,11 @@ function App() {
           onClose={() => {
             setIsFormOpen(false);
             setFormError(null);
+            setTaskToEdit(null);
           }} 
-          onSubmit={handleCreateTask}
+          onSubmit={handleFormSubmit}
           submitError={formError}
+          initialData={taskToEdit}
         />
       )}
     </div>
